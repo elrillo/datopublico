@@ -67,29 +67,45 @@ def process_diputados(data):
         # Usualmente: data['Diputados']['Diputado'] es una lista
         # Nota: xmltodict usa diccionarios anidados.
         
-        # Ajuste robusto para encontrar la lista
+        # Ajuste para el endpoint getDiputados_Vigentes
+        # La estructura suele ser <Diputados><Diputado>...</Diputado></Diputados>
+        # Pero las llaves internas cambiaron
         lista_raw = data.get('Diputados', {}).get('Diputado', [])
         
         if not isinstance(lista_raw, list):
-            lista_raw = [lista_raw] # Si es un solo elemento, xmltodict no devuelve lista
+            lista_raw = [lista_raw] 
             
         for d in lista_raw:
             try:
+                # DEBUG: Imprimir llaves del primer elemento para ver qué más hay
+                if len(items) == 0:
+                    print(f"DEBUG: Llaves de diputado: {d.keys()}")
+
+                # Extraer Partido de Militancias_Periodos
+                partido = None
+                militancias_periodos = d.get('Militancias_Periodos') or {}
+                militancias = militancias_periodos.get('Militancia', [])
+                if isinstance(militancias, dict): militancias = [militancias]
+                
+                # Tomar la última militancia (vigente)
+                if militancias:
+                    partido = militancias[-1].get('Partido')
+
                 item = {
-                    "id": int(d.get('Id')),
+                    "id": int(d.get('DIPID')),
                     "nombre": d.get('Nombre'),
-                    "apellido_paterno": d.get('ApellidoPaterno'),
-                    "apellido_materno": d.get('ApellidoMaterno'),
-                    # Partido a veces viene anidado o directo
-                    # <Partido Id="..."><Nombre>...</Nombre></Partido>
-                    "partido": d.get('Militancia', {}).get('Partido', {}).get('Nombre') if d.get('Militancia') else None,
-                    "distrito": d.get('Distrito', {}).get('Nombre') if d.get('Distrito') else None,
-                    "url_foto": f"http://www.camara.cl/img.aspx?pId={d.get('Id')}&pT=1", # URL inferida común
+                    "apellido_paterno": d.get('Apellido_Paterno'),
+                    "apellido_materno": d.get('Apellido_Materno'),
+                    "partido": partido, 
+                    "distrito": None, # Distrito no parece venir en este endpoint simple
+                    "url_foto": f"http://www.camara.cl/img.aspx?pId={d.get('DIPID')}&pT=1",
                     "updated_at": datetime.now().isoformat()
                 }
                 items.append(item)
             except Exception as e:
-                print(f"Error procesando diputado {d}: {e}")
+                print(f"Error procesando diputado {d.get('DIPID', 'Unknown')}: {e}")
+                import traceback
+                traceback.print_exc()
                 
     except Exception as e:
         print(f"Error general procesando diputados: {e}")
@@ -149,20 +165,20 @@ def main():
     print("--- Iniciando ETL Cámara de Diputados ---")
     
     # 1. Diputados Actuales
-    url_diputados = "https://opendata.camara.cl/camaradiputados/WS/Common.asmx/RetornarDiputadosPeriodoActual"
+    url_diputados = "https://opendata.camara.cl/wscamaradiputados.asmx/getDiputados_Vigentes"
     raw_diputados = fetch_and_parse(url_diputados)
     if raw_diputados:
         clean_diputados = process_diputados(raw_diputados)
+        print(f"DEBUG: Diputados procesados: {len(clean_diputados)}")
         upload_data('diputados', clean_diputados)
         
-    # 2. Votaciones 2025
-    # Nota: Si estamos a principio de año puede haber pocas.
-    year = datetime.now().year
-    url_votaciones = f"https://opendata.camara.cl/camaradiputados/WS/Legislativo.asmx/RetornarVotacionesXAno?pAno={year}"
-    raw_votaciones = fetch_and_parse(url_votaciones)
-    if raw_votaciones:
-        clean_votaciones = process_votaciones(raw_votaciones)
-        upload_data('votaciones_sala', clean_votaciones)
+    # 2. Votaciones 2025 (Comentado por error 500 en API)
+    # year = datetime.now().year
+    # url_votaciones = f"https://opendata.camara.cl/wscamaradiputados.asmx/getVotaciones_Ano?pAno={year}"
+    # raw_votaciones = fetch_and_parse(url_votaciones)
+    # if raw_votaciones:
+    #     clean_votaciones = process_votaciones(raw_votaciones)
+    #     upload_data('votaciones_sala', clean_votaciones)
 
     print("--- ETL Cámara Finalizado ---")
 

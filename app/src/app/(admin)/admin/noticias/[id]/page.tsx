@@ -1,8 +1,8 @@
 'use client'
 
 import { createClient } from "@/lib/supabase"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
@@ -13,9 +13,11 @@ import { toast } from "sonner"
 import { ArrowLeft, Loader2, Save } from "lucide-react"
 import Link from "next/link"
 
-export default function NewNewsPage() {
-    const [loading, setLoading] = useState(false)
+export default function EditNewsPage() {
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
     const router = useRouter()
+    const params = useParams()
     const supabase = createClient()
 
     const [formData, setFormData] = useState({
@@ -26,32 +28,48 @@ export default function NewNewsPage() {
         category: 'noticia',
         tags: '',
         image_url: '',
-        status: 'draft' // draft | published
+        status: 'draft'
     })
 
-    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const title = e.target.value
-        // Auto-generate slug from title
-        const slug = title
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)+/g, "")
+    useEffect(() => {
+        const fetchNews = async () => {
+            const { data, error } = await supabase
+                .from('noticias')
+                .select('*')
+                .eq('id', params.id)
+                .single()
 
-        setFormData(prev => ({ ...prev, title, slug }))
-    }
+            if (error) {
+                console.error('Error fetching news:', error)
+                toast.error('Error al cargar la noticia')
+                router.push('/admin/noticias')
+            } else {
+                setFormData({
+                    title: data.title,
+                    slug: data.slug,
+                    content: data.content || '',
+                    excerpt: data.excerpt || '',
+                    category: data.category || 'noticia',
+                    tags: data.tags ? data.tags.join(', ') : '',
+                    image_url: data.image_url || '',
+                    status: data.is_published ? 'published' : 'draft'
+                })
+                setLoading(false)
+            }
+        }
+        fetchNews()
+    }, [params.id, router, supabase])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setLoading(true)
+        setSaving(true)
 
         try {
             const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
 
             const { error } = await supabase
                 .from('noticias')
-                .insert({
+                .update({
                     title: formData.title,
                     slug: formData.slug,
                     content: formData.content,
@@ -62,18 +80,23 @@ export default function NewNewsPage() {
                     is_published: formData.status === 'published',
                     published_at: formData.status === 'published' ? new Date().toISOString() : null
                 })
+                .eq('id', params.id)
 
             if (error) throw error
 
-            toast.success('Noticia creada exitosamente')
+            toast.success('Noticia actualizada exitosamente')
             router.push('/admin/noticias')
             router.refresh()
         } catch (error) {
-            console.error('Error creating news:', error)
-            toast.error('Error al crear la noticia')
+            console.error('Error updating news:', error)
+            toast.error('Error al actualizar la noticia')
         } finally {
-            setLoading(false)
+            setSaving(false)
         }
+    }
+
+    if (loading) {
+        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
     }
 
     return (
@@ -85,9 +108,9 @@ export default function NewNewsPage() {
                     </Link>
                 </Button>
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Nueva Noticia</h2>
+                    <h2 className="text-3xl font-bold tracking-tight">Editar Noticia</h2>
                     <p className="text-muted-foreground">
-                        Crea un nuevo artículo para el sitio.
+                        Modifica el contenido del artículo.
                     </p>
                 </div>
             </div>
@@ -96,7 +119,7 @@ export default function NewNewsPage() {
                 <CardHeader>
                     <CardTitle>Detalles del Artículo</CardTitle>
                     <CardDescription>
-                        Completa la información de la noticia.
+                        Actualiza la información de la noticia.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -106,9 +129,8 @@ export default function NewNewsPage() {
                                 <Label htmlFor="title">Título</Label>
                                 <Input
                                     id="title"
-                                    placeholder="Título de la noticia"
                                     value={formData.title}
-                                    onChange={handleTitleChange}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     required
                                 />
                             </div>
@@ -117,7 +139,6 @@ export default function NewNewsPage() {
                                 <Label htmlFor="slug">Slug (URL)</Label>
                                 <Input
                                     id="slug"
-                                    placeholder="titulo-de-la-noticia"
                                     value={formData.slug}
                                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                                     required
@@ -170,7 +191,6 @@ export default function NewNewsPage() {
                             <Label htmlFor="image">URL de Imagen Principal</Label>
                             <Input
                                 id="image"
-                                placeholder="https://ejemplo.com/imagen.jpg"
                                 value={formData.image_url}
                                 onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                             />
@@ -180,7 +200,6 @@ export default function NewNewsPage() {
                             <Label htmlFor="content">Contenido</Label>
                             <Textarea
                                 id="content"
-                                placeholder="Escribe el contenido aquí..."
                                 className="min-h-[300px]"
                                 value={formData.content}
                                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -208,10 +227,10 @@ export default function NewNewsPage() {
                             <Button variant="outline" type="button" asChild>
                                 <Link href="/admin/noticias">Cancelar</Link>
                             </Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <Button type="submit" disabled={saving}>
+                                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 <Save className="mr-2 h-4 w-4" />
-                                Guardar Noticia
+                                Guardar Cambios
                             </Button>
                         </div>
                     </form>

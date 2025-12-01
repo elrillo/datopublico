@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/Sonner"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -24,14 +25,19 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="es" className="scroll-smooth">
+        <html lang="es" className="scroll-smooth" suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background font-sans text-foreground selection:bg-primary/20 selection:text-primary`}
+                className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background font-sans text-foreground selection:bg-primary/20 selection:text-primary flex flex-col`}
             >
-                <Navbar />
-                <main className="pt-16 min-h-screen">
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
                     {children}
-                </main>
+                    <Toaster />
+                </ThemeProvider>
             </body>
         </html>
     );

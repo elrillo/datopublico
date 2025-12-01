@@ -1,46 +1,40 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { BarChart3, FileText, Plus, Settings, Users } from "lucide-react"
+import { FileText, Plus, Users, Newspaper, Eye } from "lucide-react"
 import Link from "next/link"
+import { createClient } from "@/lib/supabase/server"
+import { Badge } from "@/components/ui/Badge"
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+    const supabase = await createClient()
+
+    // Fetch stats in parallel
+    const [
+        { count: newsCount },
+        { count: publishedNewsCount },
+        { count: usersCount },
+        { data: recentNews }
+    ] = await Promise.all([
+        supabase.from('noticias').select('*', { count: 'exact', head: true }),
+        supabase.from('noticias').select('*', { count: 'exact', head: true }).eq('is_published', true),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('noticias').select('*').order('created_at', { ascending: false }).limit(5)
+    ])
+
     return (
         <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-14 items-center px-4">
-                    <div className="mr-4 hidden md:flex">
-                        <Link href="/" className="mr-6 flex items-center space-x-2">
-                            <BarChart3 className="h-6 w-6" />
-                            <span className="hidden font-bold sm:inline-block">DatoPúblico Admin</span>
-                        </Link>
-                        <nav className="flex items-center space-x-6 text-sm font-medium">
-                            <Link href="/admin" className="transition-colors hover:text-foreground/80 text-foreground">
-                                Dashboard
-                            </Link>
-                            <Link href="/admin/noticias" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                                Noticias
-                            </Link>
-                            <Link href="/admin/usuarios" className="transition-colors hover:text-foreground/80 text-foreground/60">
-                                Usuarios
-                            </Link>
-                        </nav>
-                    </div>
-                    <div className="ml-auto flex items-center space-x-4">
-                        <Button variant="ghost" size="sm">
-                            Cerrar Sesión
-                        </Button>
-                    </div>
-                </div>
-            </header>
             <main className="flex-1 space-y-4 p-8 pt-6">
                 <div className="flex items-center justify-between space-y-2">
                     <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
                     <div className="flex items-center space-x-2">
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Nueva Noticia
+                        <Button asChild>
+                            <Link href="/admin/noticias/nuevo">
+                                <Plus className="mr-2 h-4 w-4" /> Nueva Noticia
+                            </Link>
                         </Button>
                     </div>
                 </div>
+
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -50,70 +44,114 @@ export default function AdminDashboard() {
                             <FileText className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">12</div>
+                            <div className="text-2xl font-bold">{newsCount || 0}</div>
                             <p className="text-xs text-muted-foreground">
-                                +2 desde el mes pasado
+                                Artículos en la base de datos
                             </p>
                         </CardContent>
                     </Card>
+
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Usuarios Activos
+                                Publicadas
+                            </CardTitle>
+                            <Newspaper className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{publishedNewsCount || 0}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Visibles para el público
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Usuarios Registrados
                             </CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">+573</div>
+                            <div className="text-2xl font-bold">{usersCount || 0}</div>
                             <p className="text-xs text-muted-foreground">
-                                +201 desde la semana pasada
+                                Miembros de la comunidad
                             </p>
                         </CardContent>
                     </Card>
+
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Configuración
+                                Visitas Totales
                             </CardTitle>
-                            <Settings className="h-4 w-4 text-muted-foreground" />
+                            <Eye className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">Sistema</div>
+                            <div className="text-2xl font-bold">--</div>
                             <p className="text-xs text-muted-foreground">
-                                v1.0.0-beta
+                                (Próximamente Analytics)
                             </p>
                         </CardContent>
                     </Card>
                 </div>
+
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <Card className="col-span-4">
                         <CardHeader>
                             <CardTitle>Noticias Recientes</CardTitle>
                             <CardDescription>
-                                Últimos artículos publicados en la plataforma.
+                                Últimos artículos creados o modificados.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-8">
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Licitación Hospitalaria</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Publicado hace 2 horas
-                                        </p>
+                                {recentNews?.map((item) => (
+                                    <div key={item.id} className="flex items-center">
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium leading-none">{item.title}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {new Date(item.created_at).toLocaleDateString()} - {item.category || 'General'}
+                                            </p>
+                                        </div>
+                                        <div className="ml-auto font-medium">
+                                            <Badge variant={item.is_published ? "default" : "secondary"}>
+                                                {item.is_published ? "Publicado" : "Borrador"}
+                                            </Badge>
+                                        </div>
                                     </div>
-                                    <div className="ml-auto font-medium">Publicado</div>
-                                </div>
-                                <div className="flex items-center">
-                                    <div className="ml-4 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Irregularidades en Obras</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Borrador
-                                        </p>
-                                    </div>
-                                    <div className="ml-auto font-medium text-muted-foreground">Borrador</div>
-                                </div>
+                                ))}
+                                {(!recentNews || recentNews.length === 0) && (
+                                    <p className="text-sm text-muted-foreground">No hay actividad reciente.</p>
+                                )}
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="col-span-3">
+                        <CardHeader>
+                            <CardTitle>Accesos Rápidos</CardTitle>
+                            <CardDescription>
+                                Gestión común del sitio.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/admin/usuarios">
+                                    <Users className="mr-2 h-4 w-4" /> Gestionar Usuarios
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/admin/noticias">
+                                    <FileText className="mr-2 h-4 w-4" /> Ver Todas las Noticias
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/">
+                                    <Eye className="mr-2 h-4 w-4" /> Ver Sitio Público
+                                </Link>
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>
