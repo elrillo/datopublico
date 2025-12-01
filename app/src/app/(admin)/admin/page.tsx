@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { FileText, Plus, Users, Newspaper, Eye } from "lucide-react"
+import { FileText, Plus, Users, Newspaper, Eye, Mail, Settings, Image as ImageIcon } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { Badge } from "@/components/ui/Badge"
@@ -143,8 +143,23 @@ export default async function AdminDashboard() {
                                 </Link>
                             </Button>
                             <Button variant="outline" className="w-full justify-start" asChild>
-                                <Link href="/admin/noticias">
-                                    <FileText className="mr-2 h-4 w-4" /> Ver Todas las Noticias
+                                <Link href="/admin/configuracion">
+                                    <Settings className="mr-2 h-4 w-4" /> Configuración del Sitio
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/admin/medios">
+                                    <ImageIcon className="mr-2 h-4 w-4" /> Biblioteca de Medios
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/admin/auditoria">
+                                    <FileText className="mr-2 h-4 w-4" /> Logs de Auditoría
+                                </Link>
+                            </Button>
+                            <Button variant="outline" className="w-full justify-start" asChild>
+                                <Link href="/admin/mensajes">
+                                    <Mail className="mr-2 h-4 w-4" /> Ver Mensajes de Contacto
                                 </Link>
                             </Button>
                             <Button variant="outline" className="w-full justify-start" asChild>

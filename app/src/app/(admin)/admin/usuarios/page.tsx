@@ -86,6 +86,19 @@ export default function UsersPage() {
             toast.error('Error al actualizar el rol')
         } else {
             setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as any } : u))
+
+            // Log audit
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                await supabase.from('audit_logs').insert({
+                    user_id: user.id,
+                    action: 'update',
+                    entity: 'user',
+                    entity_id: userId,
+                    details: { field: 'role', value: newRole }
+                })
+            }
+
             toast.success('Rol actualizado')
         }
         setUpdating(null)
@@ -103,6 +116,19 @@ export default function UsersPage() {
             toast.error('Error al actualizar fecha')
         } else {
             setUsers(users.map(u => u.id === userId ? { ...u, membership_expires_at: date || null } : u))
+
+            // Log audit
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                await supabase.from('audit_logs').insert({
+                    user_id: user.id,
+                    action: 'update',
+                    entity: 'user',
+                    entity_id: userId,
+                    details: { field: 'membership_expires_at', value: date }
+                })
+            }
+
             toast.success('Membresía actualizada')
         }
         setUpdating(null)
@@ -126,6 +152,18 @@ export default function UsersPage() {
         if (result.error) {
             toast.error(result.error)
         } else {
+            // Log audit
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user && result.userId) {
+                await supabase.from('audit_logs').insert({
+                    user_id: user.id,
+                    action: 'create',
+                    entity: 'user',
+                    entity_id: result.userId,
+                    details: { email: formData.get('email') }
+                })
+            }
+
             toast.success('Usuario creado exitosamente')
             setIsDialogOpen(false)
             fetchUsers() // Refresh list

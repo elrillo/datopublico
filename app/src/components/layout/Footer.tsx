@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { BarChart3, Github, Twitter, Mail } from "lucide-react"
+import { BarChart3, Github, Twitter, Mail, Instagram, Youtube } from "lucide-react"
 
 export function Footer() {
     return (
@@ -78,13 +78,17 @@ export function Footer() {
                                 contacto@datopublico.cl
                             </div>
                             <div className="flex gap-4">
-                                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                                <Link href="https://x.com/datopublicocl" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                                     <Twitter className="w-5 h-5" />
                                     <span className="sr-only">Twitter</span>
                                 </Link>
-                                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                    <Github className="w-5 h-5" />
-                                    <span className="sr-only">GitHub</span>
+                                <Link href="https://www.instagram.com/datopublico/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                                    <Instagram className="w-5 h-5" />
+                                    <span className="sr-only">Instagram</span>
+                                </Link>
+                                <Link href="https://www.youtube.com/@DatoPublico" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                                    <Youtube className="w-5 h-5" />
+                                    <span className="sr-only">YouTube</span>
                                 </Link>
                             </div>
                         </div>

@@ -1,26 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useFormState, useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Textarea } from "@/components/ui/Textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { Mail, MessageSquare, Send, ShieldAlert } from "lucide-react"
+import { Mail, MessageSquare, Send, ShieldAlert, Loader2 } from "lucide-react"
+import { submitContactMessage } from "@/app/actions/contact"
+import { useEffect, useRef } from "react"
+import { toast } from "sonner"
+
+const initialState: { error?: string; success?: string } = {}
+
+function SubmitButton() {
+    const { pending } = useFormStatus()
+    return (
+        <Button type="submit" className="w-full h-11 text-base shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all" disabled={pending}>
+            {pending ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando...
+                </>
+            ) : (
+                <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar Mensaje
+                </>
+            )}
+        </Button>
+    )
+}
 
 export default function ContactoPage() {
-    const [isLoading, setIsLoading] = useState(false)
+    const [state, formAction] = useFormState(submitContactMessage, initialState)
+    const formRef = useRef<HTMLFormElement>(null)
 
-    async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        setIsLoading(true)
-
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false)
-            alert("Mensaje enviado (simulación)")
-        }, 1000)
-    }
+    useEffect(() => {
+        if (state?.success) {
+            toast.success(state.success)
+            formRef.current?.reset()
+        } else if (state?.error) {
+            toast.error(state.error)
+        }
+    }, [state])
 
     return (
         <div className="container mx-auto px-4 py-16 max-w-6xl">
@@ -56,9 +79,9 @@ export default function ContactoPage() {
                                 <h3 className="font-bold text-xl mb-1">Redes Sociales</h3>
                                 <p className="text-muted-foreground mb-2">Síguenos para actualizaciones diarias.</p>
                                 <div className="flex gap-4">
-                                    <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Twitter</a>
-                                    <a href="#" className="text-sm font-medium hover:text-primary transition-colors">LinkedIn</a>
-                                    <a href="#" className="text-sm font-medium hover:text-primary transition-colors">Instagram</a>
+                                    <a href="https://x.com/datopublicocl" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary transition-colors">Twitter</a>
+                                    <a href="https://www.instagram.com/datopublico/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary transition-colors">Instagram</a>
+                                    <a href="https://www.youtube.com/@DatoPublico" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary transition-colors">YouTube</a>
                                 </div>
                             </div>
                         </div>
@@ -87,43 +110,35 @@ export default function ContactoPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="p-8 pt-4">
-                        <form onSubmit={onSubmit} className="space-y-6">
+                        <form ref={formRef} action={formAction} className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Nombre</Label>
-                                    <Input id="name" placeholder="Tu nombre" required className="h-11" />
+                                    <Input id="name" name="name" placeholder="Tu nombre" required className="h-11" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type="email" placeholder="tu@email.com" required className="h-11" />
+                                    <Input id="email" name="email" type="email" placeholder="tu@email.com" required className="h-11" />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="subject">Asunto</Label>
-                                <Input id="subject" placeholder="¿Sobre qué quieres hablar?" required className="h-11" />
+                                <Input id="subject" name="subject" placeholder="¿Sobre qué quieres hablar?" required className="h-11" />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="message">Mensaje</Label>
                                 <Textarea
                                     id="message"
+                                    name="message"
                                     placeholder="Escribe tu mensaje aquí..."
                                     className="min-h-[150px] resize-none"
                                     required
                                 />
                             </div>
 
-                            <Button type="submit" className="w-full h-11 text-base shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all" disabled={isLoading}>
-                                {isLoading ? (
-                                    "Enviando..."
-                                ) : (
-                                    <>
-                                        <Send className="mr-2 h-4 w-4" />
-                                        Enviar Mensaje
-                                    </>
-                                )}
-                            </Button>
+                            <SubmitButton />
                         </form>
                     </CardContent>
                 </Card>

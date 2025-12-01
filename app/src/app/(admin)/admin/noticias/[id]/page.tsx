@@ -84,6 +84,18 @@ export default function EditNewsPage() {
 
             if (error) throw error
 
+            // Log audit
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                await supabase.from('audit_logs').insert({
+                    user_id: user.id,
+                    action: 'update',
+                    entity: 'news',
+                    entity_id: params.id as string,
+                    details: { title: formData.title, status: formData.status }
+                })
+            }
+
             toast.success('Noticia actualizada exitosamente')
             router.push('/admin/noticias')
             router.refresh()

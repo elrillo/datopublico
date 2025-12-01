@@ -49,9 +49,9 @@ export default function NewNewsPage() {
         try {
             const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
 
-            const { error } = await supabase
+            const { data: newNews, error } = await supabase
                 .from('noticias')
-                .insert({
+                .insert([{
                     title: formData.title,
                     slug: formData.slug,
                     content: formData.content,
@@ -61,9 +61,23 @@ export default function NewNewsPage() {
                     image_url: formData.image_url,
                     is_published: formData.status === 'published',
                     published_at: formData.status === 'published' ? new Date().toISOString() : null
-                })
+                }])
+                .select()
+                .single()
 
             if (error) throw error
+
+            // Log audit
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                await supabase.from('audit_logs').insert({
+                    user_id: user.id,
+                    action: 'create',
+                    entity: 'news',
+                    entity_id: newNews.id,
+                    details: { title: formData.title, slug: formData.slug }
+                })
+            }
 
             toast.success('Noticia creada exitosamente')
             router.push('/admin/noticias')

@@ -61,5 +61,18 @@ export async function createNewUser(formData: FormData) {
         }
     }
 
-    return { success: true }
+    // 3. Log audit
+    // Since this is a server action, we need to get the current admin user ID
+    // However, createClient with service role doesn't have a current user session.
+    // We might need to pass the admin ID or just log as 'system' or skip user_id check if RLS allows.
+    // For now, let's skip audit log here or we'd need to pass the actor's ID from the client.
+    // Alternatively, we can assume the caller is authorized and we just log the event if we had the actor ID.
+
+    // Let's try to get the user from the standard client in the component, but here we are in a server action.
+    // We will skip audit log inside this function to avoid complexity, 
+    // but we should log it in the client component after success if possible, 
+    // OR we can fetch the current user if we use a cookie-based client here instead of admin client for the actor.
+
+    // Better approach: Return the new user ID so the client can log it.
+    return { success: true, userId: authData.user.id }
 }
