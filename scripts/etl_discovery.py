@@ -1,6 +1,7 @@
 import os
 import requests
 import xmltodict
+from datetime import datetime
 import time
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -78,8 +79,8 @@ def main():
     
     total_boletines_found = 0
     
-    # Tomamos las ultimas 3 legislaturas para la prueba
-    for leg in legislaturas[:3]:
+    # Tomamos las ultimas 5 legislaturas para tener historia reciente
+    for leg in legislaturas[:5]:
         leg_id = leg['ID']
         print(f"\nProcesando Legislatura {leg_id}...")
         
@@ -90,16 +91,51 @@ def main():
         
         if not isinstance(sesiones, list): sesiones = [sesiones]
         
-        print(f"  Encontradas {len(sesiones)} sesiones.")
+        # ORDENAR SESIONES DESCENDENTE (ID mayor primero) para ver lo más reciente
+        sesiones.sort(key=lambda x: int(x['ID']), reverse=True)
         
-        for ses in sesiones[:10]: # Aumentamos a 10 sesiones
+        print(f"  Encontradas {len(sesiones)} sesiones. Procesando las últimas 20...")
+        
+        # Procesar sesiones (guardar en DB y buscar boletines)
+        sesiones_to_process = sesiones[:20] 
+        
+        # Preparar datos para tabla 'sesiones'
+        sesiones_db_items = []
+        for s in sesiones_to_process:
+            try:
+                # Parsear fecha ISO
+                fecha = s.get('Fecha')
+                if fecha:
+                    try:
+                         fecha = datetime.strptime(fecha, "%Y-%m-%dT%H:%M:%S").isoformat()
+                    except: pass
+                
+                sesiones_db_items.append({
+                    "id": f"DIP-{s.get('ID')}", # Prefijo para distinguir de Senado
+                    "camara": "Diputados",
+                    "numero": int(s.get('Numero', 0)),
+                    "legislatura": int(leg_id),
+                    "fecha": fecha,
+                    "tipo": s.get('Tipo'),
+                    "updated_at": datetime.now().isoformat()
+                })
+            except Exception as e:
+                print(f"Error parseando sesión db item: {e}")
+
+        # Guardar sesiones en lote
+        if sesiones_db_items:
+            try:
+                supabase.table('sesiones').upsert(sesiones_db_items, on_conflict='id').execute()
+                print(f"    Guardadas {len(sesiones_db_items)} sesiones en DB.")
+            except Exception as e:
+                print(f"    Error guardando sesiones: {e}")
+
+        # Buscar boletines en estas sesiones
+        for ses in sesiones_to_process:
             ses_id = ses['ID']
-            
             boletines = extract_boletines_from_sesion(ses_id)
             if boletines:
                 print(f"    Sesión {ses_id}: Encontrados {len(boletines)} boletines.")
-                
-                # Guardar en Supabase (Solo el ID por ahora)
                 items = [{"boletin": b} for b in boletines]
                 try:
                     supabase.table('proyectos_ley').upsert(items, on_conflict='boletin', ignore_duplicates=True).execute()

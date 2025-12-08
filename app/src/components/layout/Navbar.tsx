@@ -42,19 +42,19 @@ export function Navbar() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="w-48">
                                 <DropdownMenuItem asChild>
-                                    <Link href="/compras" className="flex items-center gap-2 cursor-pointer">
+                                    <Link href="/datos/compras" className="flex items-center gap-2 cursor-pointer">
                                         <Building2 className="w-4 h-4 text-blue-500" />
                                         <span>Compras Públicas</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                    <Link href="/salud" className="flex items-center gap-2 cursor-pointer">
+                                    <Link href="/datos/salud" className="flex items-center gap-2 cursor-pointer">
                                         <HeartPulse className="w-4 h-4 text-green-500" />
                                         <span>Salud</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
-                                    <Link href="/educacion" className="flex items-center gap-2 cursor-pointer">
+                                    <Link href="/datos/educacion" className="flex items-center gap-2 cursor-pointer">
                                         <GraduationCap className="w-4 h-4 text-amber-500" />
                                         <span>Educación</span>
                                     </Link>
@@ -105,21 +105,21 @@ export function Navbar() {
                         <div className="space-y-2 pl-2">
                             <div className="text-sm font-semibold text-foreground px-2">Datos</div>
                             <Link
-                                href="/compras"
+                                href="/datos/compras"
                                 className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors p-2 hover:bg-muted rounded-md pl-4"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 <Building2 className="w-4 h-4" /> Compras Públicas
                             </Link>
                             <Link
-                                href="/salud"
+                                href="/datos/salud"
                                 className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors p-2 hover:bg-muted rounded-md pl-4"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 <HeartPulse className="w-4 h-4" /> Salud
                             </Link>
                             <Link
-                                href="/educacion"
+                                href="/datos/educacion"
                                 className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors p-2 hover:bg-muted rounded-md pl-4"
                                 onClick={() => setIsMenuOpen(false)}
                             >

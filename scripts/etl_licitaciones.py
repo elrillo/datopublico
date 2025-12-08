@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 # Cargar variables de entorno
@@ -129,8 +129,9 @@ def upload_to_supabase(items):
     print(f"Proceso finalizado. Total licitaciones procesadas: {total_inserted}")
 
 def main():
-    today = datetime.now()
-    date_str = today.strftime("%d%m%Y") 
+    # Consultar datos de ayer para asegurar el día completo
+    yesterday = datetime.now() - timedelta(days=1)
+    date_str = yesterday.strftime("%d%m%Y") 
     
     print(f"--- Iniciando ETL Licitaciones ---")
     

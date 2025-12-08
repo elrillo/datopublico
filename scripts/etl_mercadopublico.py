@@ -175,9 +175,9 @@ def upload_proveedores(items):
             print(f"Error subiendo lote de proveedores: {e}")
 
 def main():
-    # Por defecto hoy.
-    today = datetime.now()
-    date_str = today.strftime("%d%m%Y") 
+    # Consultar datos de ayer para asegurar el día completo
+    yesterday = datetime.now() - timedelta(days=1)
+    date_str = yesterday.strftime("%d%m%Y") 
     
     print(f"--- Iniciando ETL MercadoPúblico (Órdenes de Compra) ---")
     
