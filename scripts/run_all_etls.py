@@ -20,7 +20,9 @@ def main():
         "etl_discovery.py",
         "etl_proyectos.py",
         "etl_diputados.py",
-        "etl_senado.py"
+        "etl_senado.py",
+        "etl_historical_details.py", # Votaciones Cámara Detalle
+        "etl_senado_details.py"      # Votaciones Senado Detalle
     ]
     
     for script in scripts:
