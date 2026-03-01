@@ -27,3 +27,27 @@ export async function createClient() {
         }
     )
 }
+export async function createLegislativoClient() {
+    const cookieStore = await cookies()
+
+    return createServerClient(
+        process.env.NEXT_PUBLIC_LEGISLATIVO_URL!,
+        process.env.NEXT_PUBLIC_LEGISLATIVO_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            cookieStore.set(name, value, options)
+                        )
+                    } catch {
+                        // Ignored
+                    }
+                },
+            },
+        }
+    )
+}

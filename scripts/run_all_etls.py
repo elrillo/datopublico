@@ -1,6 +1,7 @@
 import subprocess
 import time
 import sys
+import os
 
 def run_script(script_name):
     print(f"--- Ejecutando {script_name} ---")
@@ -16,13 +17,16 @@ def run_script(script_name):
 def main():
     print("Iniciando Orquestador de ETLs...\n")
     
+    # Obtener el directorio donde reside este script (run_all_etls.py)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
     scripts = [
-        "etl_discovery.py",
-        "etl_proyectos.py",
-        "etl_diputados.py",
-        "etl_senado.py",
-        "etl_historical_details.py", # Votaciones Cámara Detalle
-        "etl_senado_details.py"      # Votaciones Senado Detalle
+        os.path.join(base_dir, "etl_discovery.py"),
+        os.path.join(base_dir, "etl_proyectos.py"),
+        os.path.join(base_dir, "etl_diputados.py"),
+        os.path.join(base_dir, "etl_senado.py"),
+        os.path.join(base_dir, "etl_historical_details.py"), # Votaciones Cámara Detalle
+        os.path.join(base_dir, "etl_senado_details.py")      # Votaciones Senado Detalle
     ]
     
     for script in scripts:

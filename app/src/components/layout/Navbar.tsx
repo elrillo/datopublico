@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
-import { BarChart3, Menu, X, Heart, ChevronDown, Building2, HeartPulse, GraduationCap } from "lucide-react"
+import { BarChart3, Menu, X, Heart, ChevronDown, Building2, HeartPulse, GraduationCap, Landmark } from "lucide-react"
 import { useState } from "react"
 import { SearchCommand } from "@/components/layout/SearchCommand"
 import { ModeToggle } from "@/components/ui/ModeToggle"
@@ -45,6 +45,12 @@ export function Navbar() {
                                     <Link href="/datos/compras" className="flex items-center gap-2 cursor-pointer">
                                         <Building2 className="w-4 h-4 text-blue-500" />
                                         <span>Compras Públicas</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/datos/legislativo" className="flex items-center gap-2 cursor-pointer">
+                                        <Landmark className="w-4 h-4 text-purple-500" />
+                                        <span>Congreso</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
@@ -110,6 +116,13 @@ export function Navbar() {
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 <Building2 className="w-4 h-4" /> Compras Públicas
+                            </Link>
+                            <Link
+                                href="/datos/legislativo"
+                                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors p-2 hover:bg-muted rounded-md pl-4"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <Landmark className="w-4 h-4" /> Congreso
                             </Link>
                             <Link
                                 href="/datos/salud"

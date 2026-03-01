@@ -7,11 +7,14 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Cargar variables de entorno
-load_dotenv()
+# Cargar variables de entorno desde el directorio raíz
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+load_dotenv(dotenv_path=env_path)
 
 # Configuración de Supabase
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+# Configuración de Supabase (Proyecto Legislativo)
+SUPABASE_URL = os.getenv("LEGISLATIVO_URL")
+SUPABASE_KEY = os.getenv("LEGISLATIVO_SERVICE_ROLE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Faltan las credenciales de Supabase en el archivo .env")

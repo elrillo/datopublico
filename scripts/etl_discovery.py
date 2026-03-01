@@ -7,10 +7,12 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from datetime import datetime
 
-load_dotenv()
+# Cargar variables de entorno desde el directorio raíz
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+load_dotenv(dotenv_path=env_path)
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_URL = os.getenv("LEGISLATIVO_URL")
+SUPABASE_KEY = os.getenv("LEGISLATIVO_SERVICE_ROLE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def fetch_xml(url):

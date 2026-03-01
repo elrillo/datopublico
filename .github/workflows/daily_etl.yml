@@ -24,16 +24,17 @@ jobs:
 
     - name: Run Legislative ETLs
       env:
-        # Usa las credenciales del NUEVO proyecto (Legislativo)
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        # Usa las variables específicas que esperan los scripts legislativos
+        LEGISLATIVO_URL: ${{ secrets.LEGISLATIVO_URL }}
+        LEGISLATIVO_SERVICE_ROLE_KEY: ${{ secrets.LEGISLATIVO_SERVICE_ROLE_KEY }}
+        # Si algún script compartido usa SUPABASE_URL, deberíamos asegurarnos que no se confunda,
+        # pero ahora todos los legislativos usan LEGISLATIVO_*.
       run: |
         cd scripts
         python run_all_etls.py
 
   run-mercadopublico:
     runs-on: ubuntu-latest
-    needs: run-legislativo # Ejecutar después (opcional, puede ser paralelo)
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -50,10 +51,9 @@ jobs:
 
     - name: Run MercadoPublico ETLs
       env:
-        # Usa las credenciales del ANTIGUO proyecto (MercadoPublico)
-        # Mapeamos los secretos _MP a las variables estándar que usan los scripts
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL_MP }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY_MP }}
+        # Credenciales para DatoPublico (Standard)
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         MERCADOPUBLICO_TICKET: ${{ secrets.MERCADOPUBLICO_TICKET }}
       run: |
         cd scripts

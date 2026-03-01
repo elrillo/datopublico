@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(head:*)",
+      "Bash(find:*)",
+      "Bash(rsync:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(gh auth status)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: initial project setup - Node.js monorepo with Next.js + ETL pipeline\n\n- npm workspaces monorepo \\(apps/web + packages/etl\\)\n- Next.js 16 frontend with admin CMS \\(noticias, estudios, usuarios, settings\\)\n- New: Admin CRUD for Estudios \\(create, edit, delete, publish\\)\n- ETL package with shared libraries \\(http, xml, batch, dates, hash, logger\\)\n- Discovery ETL migrated from Python to TypeScript\n- GitHub Actions workflow adapted for Node.js\n- Supabase schemas and migrations \\(27 SQL files\\)\n- Dual Supabase project support \\(primary + legislativo\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm ls:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(test:*)"
+    ]
+  }
+}
