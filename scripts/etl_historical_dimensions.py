@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Forzar credenciales LEGISLATIVO (Open Data)
-SUPABASE_URL = "https://tbniuckpxxzphturwnaj.supabase.co"
-SUPABASE_KEY = "sb_secret_qwNGeDMU3wzM2rMj04nZww_cI4G3e68"
+SUPABASE_URL = os.getenv("SUPABASE_URL")  # Set in .env
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")  # Set in .env
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Funciones Auxiliares ---
